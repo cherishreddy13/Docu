@@ -4,7 +4,7 @@ from sqlalchemy import text
 import datetime
 from dotenv import load_dotenv
 import os
-
+from urllib.parse import quote_plus
 
 load_dotenv()
 
@@ -12,10 +12,32 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = 'secret-key'
 
+
+# For Render PostgreSQL
+DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL and DATABASE_URL.startswith('postgres://'):
+    DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+with app.app_context():
+    try:
+        db.create_all()
+        print("Database tables created successfully")
+    except Exception as e:
+        print(f"Database error: {str(e)}")
+        db.session.rollback()
+
+@app.route('/test_db')
+def test_db():
+    try:
+        db.session.execute(text("SELECT 1"))
+        return "Database connection successful!"
+    except Exception as e:
+        return f"Database connection failed: {str(e)}", 500
 
 # Login Table
 class Login(db.Model):
