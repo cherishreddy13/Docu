@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <h2>Welcome, {{ session['user'] }} (Group: {{ session['group'] }})</h2>
+
+    <form action="/add_entry" method="POST">
+        <input type="text" name="topic" placeholder="Topic" required>
+        <input type="date" name="date" required>
+        <textarea name="description" placeholder="Description" required></textarea>
+        <button type="submit">Add Entry</button>
+    </form>
+
+    <hr>
+
+    {% for topic, entries in grouped.items() %}
+        <h3>Topic: {{ topic }}</h3>
+        <table border="1">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+            {% for row in entries %}
+            <tr>
+                <td>{{ row.id }}</td>
+                <td>{{ row.name }}</td>
+                <td>{{ row.date }}</td>
+                <td>{{ row.description }}</td>
+                <td>
+                    <form action="/edit_entry/{{ row.id }}" method="GET" style="display:inline;">
+                        <button type="submit">Edit</button>
+                    </form>
+                    <form action="/delete_entry/{{ row.id }}" method="POST" style="display:inline;">
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <br>
+    {% endfor %}
+<hr>
+<h2>📝 Group Activity Log</h2>
+<table border="1">
+    <tr>
+        <th>User</th>
+        <th>Action</th>
+        <th>Timestamp</th>
+    </tr>
+    {% for log in logs %}
+    <tr>
+        <td>{{ log.user }}</td>
+        <td>{{ log.action }}</td>
+        <td>{{ log.timestamp }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+    <a href="/logout">Logout</a>
+</body>
+</html>
